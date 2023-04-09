@@ -1,0 +1,36 @@
+{
+    "name": "serverless-dynamodb-session-store",
+    "version": "1.0.0",
+    "description": "Express session store using AWS DynamoDB",
+    "main": "dist/index.js",
+    "keywords": [
+        "express",
+        "session",
+        "dynamodb",
+        "aws"
+    ],
+    "scripts": {
+      "build": "tsc",
+      "start": "ts-node src/index.ts"
+    },
+    "dependencies": {
+        "@aws-sdk/client-dynamodb": "^3.309.0",
+        "@aws-sdk/lib-dynamodb": "^3.309.0",
+        "express-session": "^1.17.3"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/gboysking/serverless-dynamodb-session-store.git"
+    },
+    "bugs": {
+        "url": "https://github.com/gboysking/serverless-dynamodb-session-store/issues",
+        "email": "gboyskingq@gmail.com"
+      },
+    "author": "gboysking",
+    "license": "MIT",
+    "devDependencies": {
+        "@types/express-session": "^1.17.7",
+        "ts-node": "^10.9.1",
+        "typescript": "^5.0.4"
+    }
+}
