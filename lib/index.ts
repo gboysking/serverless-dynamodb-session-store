@@ -1,4 +1,4 @@
-import { DynamoDBDocument, GetCommand, GetCommandInput, ScanCommandInput } from "@aws-sdk/lib-dynamodb";
+import { DynamoDBDocument, GetCommand, GetCommandInput, ScanCommandInput, UpdateCommand, UpdateCommandInput } from "@aws-sdk/lib-dynamodb";
 import { BatchWriteItemInput, CreateTableCommand, DescribeTableCommand, DescribeTimeToLiveCommand, DynamoDBClient, UpdateTimeToLiveCommand } from "@aws-sdk/client-dynamodb";
 import { SessionData, Store } from 'express-session';
 
@@ -92,7 +92,7 @@ export class DynamoDBSessionStore extends Store {
             const getResult = await this.client.send(new GetCommand(getParams));
 
             if (getResult.Item) {
-                const session = JSON.parse(getResult.Item.session);
+                const session = JSON.parse(getResult.Item.session_data);
                 callback(null, session);
             } else {
                 callback(null, null);
@@ -102,61 +102,34 @@ export class DynamoDBSessionStore extends Store {
         }
     }
 
-    async set(
-        sid: string,
-        session: SessionData,
-        callback?: (err?: any) => void
-    ): Promise<void> {
+    async set(sid: string, session: SessionData, callback?: (err?: any) => void): Promise<void> {
         try {
             const expireTime = session.cookie?.expires
                 ? new Date(session.cookie.expires).getTime()
                 : null;
             const expireTime_TTL = expireTime ? Math.floor(expireTime / 1000) : null;
-
-            const getParams: GetCommandInput = {
+    
+            const updateParams: UpdateCommandInput = {
                 TableName: this.table,
                 Key: {
                     sessionId: sid,
                 },
+                UpdateExpression: 'SET expireTime = :expireTime, expireTime_TTL = :expireTime_TTL, session_data = :session',
+                ExpressionAttributeValues: {
+                    ':expireTime': expireTime,
+                    ':expireTime_TTL': expireTime_TTL,
+                    ':session': JSON.stringify(session),
+                },
             };
-
-            const getResult = await this.client.send(new GetCommand(getParams));
-
-            if (getResult.Item) {
-                await Promise.all([
-                    this.client.delete({
-                        TableName: this.table,
-                        Key: {
-                            sessionId: sid
-                        },
-                    }),
-                    this.client.put({
-                        TableName: this.table,
-                        Item: {
-                            sessionId: sid,
-                            expireTime: expireTime,
-                            expireTime_TTL: expireTime_TTL,
-                            session: JSON.stringify(session),
-                        },
-                    }),
-                ]);
-            } else {
-                await this.client.put({
-                    TableName: this.table,
-                    Item: {
-                        sessionId: sid,
-                        expireTime: expireTime,
-                        expireTime_TTL: expireTime_TTL,
-                        session: JSON.stringify(session),
-                    },
-                });
-            }
-
+    
+            await this.client.send(new UpdateCommand(updateParams));
+    
             callback?.();
         } catch (error) {
             callback?.(error);
         }
     }
+    
 
     async destroy(sid: string, callback?: (err?: any) => void): Promise<void> {
         try {
@@ -197,40 +170,28 @@ export class DynamoDBSessionStore extends Store {
         try {
             const expireTime = session.cookie.expires ? new Date(session.cookie.expires).getTime() : null;
             const expireTime_TTL = expireTime ? Math.floor(expireTime / 1000) : null;
-
-            const getParams: GetCommandInput = {
+    
+            const updateParams: UpdateCommandInput = {
                 TableName: this.table,
                 Key: {
                     sessionId: sid,
                 },
+                UpdateExpression: 'SET expireTime = :expireTime, expireTime_TTL = :expireTime_TTL, session_data = :session',
+                ExpressionAttributeValues: {
+                    ':expireTime': expireTime,
+                    ':expireTime_TTL': expireTime_TTL,                    
+                    ':session': JSON.stringify(session)
+                },
             };
-
-            const getResult = await this.client.send(new GetCommand(getParams));
-
-            if (getResult.Item) {
-
-                await Promise.all([
-                    this.client.delete({
-                        TableName: this.table,
-                        Key: { sessionId: sid },
-                    }),
-                    this.client.put({
-                        TableName: this.table,
-                        Item: {
-                            sessionId: sid,
-                            expireTime: expireTime,
-                            expireTime_TTL: expireTime_TTL,
-                            session: JSON.stringify(session),
-                        },
-                    }),
-                ]);
-            }
-
+    
+            await this.client.send(new UpdateCommand(updateParams));
+    
             callback && callback();
         } catch (error) {
             callback && callback(error);
         }
     }
+    
 
     async reap(callback?: (err?: any) => void): Promise<void> {
         try {
@@ -276,7 +237,7 @@ export class DynamoDBSessionStore extends Store {
             const sessions: { [sid: string]: SessionData } = {};
 
             result.Items?.forEach((item) => {
-                sessions[item.sessionId] = JSON.parse(item.session);
+                sessions[item.sessionId] = JSON.parse(item.session_data);
             });
 
             callback(null, sessions);
