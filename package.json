@@ -1,6 +1,6 @@
 {
     "name": "serverless-dynamodb-session-store",
-    "version": "1.0.2",
+    "version": "1.0.3",
     "description": "Express session store using AWS DynamoDB",
     "main": "dist/index.js",
     "types" : "dist/index.d.ts",
@@ -26,6 +26,7 @@
         "url": "https://github.com/gboysking/serverless-dynamodb-session-store/issues",
         "email": "gboyskingq@gmail.com"
       },
+    "homepage": "https://tobelinuxer.tistory.com",
     "author": "gboysking <gboyskingq@gmail.com>",
     "license": "MIT",
     "devDependencies": {
