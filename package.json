@@ -1,6 +1,6 @@
 {
     "name": "serverless-dynamodb-session-store",
-    "version": "1.0.3",
+    "version": "1.0.4",
     "description": "Express session store using AWS DynamoDB",
     "main": "dist/index.js",
     "types" : "dist/index.d.ts",
@@ -8,7 +8,9 @@
         "express",
         "session",
         "dynamodb",
-        "aws"
+        "aws",
+        "serverless",
+        "lambda"
     ],
     "scripts": {
       "build": "tsc"

@@ -1,6 +1,6 @@
 # DynamoDB Session Store for Express
 
-This project provides a DynamoDB-based session store for Express applications. It allows you to store your Express session data in a DynamoDB table, providing a scalable and reliable storage solution.
+This project provides a DynamoDB-based session store for Express applications. It allows you to store your Express session data in a DynamoDB table, providing a scalable and reliable storage solution. It is based on the implementation described in [this blog post](https://tobelinuxer.tistory.com/65).
 
 ## Features
 - Store Express session data in DynamoDB
